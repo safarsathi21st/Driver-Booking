@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafarSaathi - आपकी कार, हमारा एक्सपर्ट पायलट</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .navy-gradient { background: linear-gradient(135deg, #060B1E 0%, #101F42 60%, #1E293B 100%); }
+        .gold-text { background: linear-gradient(to right, #FDE08D, #DF9F28); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gold-border { border-color: #D4AF37; }
+        .gold-bg { background: linear-gradient(135deg, #FDE08D 0%, #D4AF37 50%, #AA7C11 100%); }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans pb-24 max-w-md mx-auto shadow-2xl min-h-screen relative">
+
+    <!-- Header & Hero -->
+    <div class="navy-gradient text-white p-5 rounded-b-3xl shadow-lg relative overflow-hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-extrabold italic tracking-wide">Safar<span class="text-amber-400">Saathi</span></h1>
+            <a href="/admin.html" class="w-9 h-9 rounded-full border border-amber-400/60 flex items-center justify-center text-amber-300 bg-white/5" title="Admin Panel">
+                <i class="fa-solid fa-user-shield"></i>
+            </a>
+        </div>
+        <div class="flex justify-between items-center">
+            <div class="space-y-1 max-w-[60%]">
+                <h2 class="text-2xl font-bold leading-tight"><span class="gold-text">Ride with</span><br>SafarSaathi</h2>
+                <span class="inline-block gold-bg text-slate-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded-md">
+                    Safe • Reliable • Affordable
+                </span>
+            </div>
+            <div class="w-36 text-right">
+                <i class="fa-solid fa-car-rear text-6xl text-amber-400/90 drop-shadow-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOME TAB -->
+    <main id="tab-home" class="px-4 -mt-4 space-y-4 relative z-10">
+        <!-- Trip Type & Add Stop -->
+        <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="setTrip('Outstation')" id="btn-outstation" class="navy-gradient text-white py-2.5 px-2 rounded-xl border-2 gold-border shadow-md flex flex-col items-center">
+                <span class="text-xs font-bold text-amber-300"><i class="fa-solid fa-route mr-1"></i>Outstation</span>
+                <span class="text-[10px] text-slate-300">(सक्रिय टैब)</span>
+            </button>
+            <button type="button" onclick="setTrip('Local')" id="btn-local" class="bg-white text-slate-700 py-2.5 px-2 rounded-xl border border-slate-300 shadow-sm flex flex-col items-center">
+                <span class="text-xs font-bold"><i class="fa-solid fa-car mr-1"></i>Local</span>
+                <span class="text-[10px] text-slate-400">(सिटी राइड)</span>
+            </button>
+            <button type="button" onclick="toggleStop()" class="bg-amber-50 text-slate-900 py-2.5 px-2 rounded-xl border border-amber-400 shadow-sm flex flex-col items-center">
+                <span class="text-xs font-bold">+ स्टॉप जोड़ें</span>
+                <span class="text-[10px] text-amber-800">(+ Add Stop)</span>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form onsubmit="submitBooking(event)" class="space-y-4">
+            <!-- Customer Details -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-md border border-amber-300/60 grid grid-cols-2 gap-2">
+                <input type="text" id="cust_name" required placeholder="आपका नाम (Name)" class="text-xs p-2.5 bg-slate-50 border rounded-xl outline-none">
+                <input type="tel" id="cust_phone" required pattern="[0-9]{10}" placeholder="मोबाइल नंबर (10 अंक)" class="text-xs p-2.5 bg-slate-50 border rounded-xl outline-none">
+            </div>
+
+            <!-- Locations & Date -->
+            <div class="bg-white p-4 rounded-2xl shadow-md border border-amber-300/60 space-y-3">
+                <div class="flex items-center border-b pb-2">
+                    <i class="fa-solid fa-circle-dot text-blue-900 mr-2.5"></i>
+                    <input type="text" id="pickup" required placeholder="Pickup Location (जैसे: विजय नगर, इंदौर)" class="w-full text-xs outline-none">
+                </div>
+                <div id="stop-box" class="hidden flex items-center border-b pb-2">
+                    <i class="fa-solid fa-plus-circle text-amber-600 mr-2.5"></i>
+                    <input type="text" id="stops" placeholder="बीच का स्टॉप (Intermediate Stop)" class="w-full text-xs outline-none">
+                </div>
+                <div class="flex items-center border-b pb-2">
+                    <i class="fa-solid fa-location-dot text-amber-600 mr-2.5"></i>
+                    <input type="text" id="drop_loc" required placeholder="Drop Location (जैसे: राजवाड़ा / उज्जैन)" class="w-full text-xs outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="border border-amber-400/70 rounded-xl p-2 flex items-center">
+                        <input type="date" id="journey_date" required class="w-full text-xs outline-none bg-transparent">
+                    </div>
+                    <div class="border border-amber-400/70 rounded-xl p-2 flex items-center">
+                        <input type="time" id="journey_time" required class="w-full text-xs outline-none bg-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Car Details (Navy Card) -->
+            <div class="navy-gradient text-white p-4 rounded-2xl border-2 gold-border shadow-lg space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-amber-300">आपकी गाड़ी की जानकारी</h3>
+                    <i class="fa-solid fa-gears text-amber-400"></i>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="text-[10px] text-slate-300 block mb-1">(कार का नाम/मॉडल)</label>
+                        <input type="text" id="car_model" required placeholder="जैसे: Swift, Creta" class="w-full text-xs p-2 rounded-lg text-slate-900 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-300 block mb-1">कार ट्रांसमिशन</label>
+                        <select id="transmission" class="w-full text-xs p-2 rounded-lg bg-slate-900 text-amber-300 border border-amber-400 outline-none">
+                            <option value="Manual">मैनुअल (Manual)</option>
+                            <option value="Automatic">ऑटोमैटिक (Automatic)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value Added Services -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-800 mb-2">अतिरिक्त सेवाएँ (Value Added Services) या हमारे पार्टनर्स</h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="bg-white p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50">
+                        <input type="checkbox" name="vas" value="Car Insurance" class="hidden">
+                        <div class="flex justify-between items-start"><span class="text-[11px] font-bold">कार इन्शुरन्स</span><i class="fa-solid fa-shield-halved text-blue-900 text-xs"></i></div>
+                        <span class="text-[9px] text-amber-700 font-semibold mt-1">सिर्फ ₹1999/साल से</span>
+                    </label>
+                    <label class="bg-white p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50">
+                        <input type="checkbox" name="vas" value="Roadside Assist" class="hidden">
+                        <div class="flex justify-between items-start"><span class="text-[11px] font-bold">रोडसाइड असिस्टेंस</span><i class="fa-solid fa-truck-pickup text-blue-900 text-xs"></i></div>
+                        <span class="text-[9px] text-amber-700 font-semibold mt-1">24x7 सहायता</span>
+                    </label>
+                    <label class="bg-white p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50">
+                        <input type="checkbox" name="vas" value="Car Servicing" class="hidden">
+                        <div class="flex justify-between items-start"><span class="text-[11px] font-bold">गाड़ी सर्विसिंग</span><i class="fa-solid fa-screwdriver-wrench text-blue-900 text-xs"></i></div>
+                        <span class="text-[9px] text-amber-700 font-semibold mt-1">घर बैठे पिकअप</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full navy-gradient text-white font-bold py-3.5 rounded-full border-2 gold-border shadow-xl text-sm tracking-wide">
+                Confirm Request
+            </button>
+        </form>
+    </main>
+
+    <!-- BOOKING & CAPTAIN TABS -->
+    <section id="tab-status" class="hidden px-4 pt-4 space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200">
+            <label class="text-xs font-bold text-slate-700 block mb-1.5">अपना बुकिंग स्टेटस और कैप्टन देखने के लिए मोबाइल नंबर डालें:</label>
+            <div class="flex space-x-2">
+                <input type="tel" id="search_phone" placeholder="10 अंकों का मोबाइल नंबर" class="flex-1 text-xs p-2.5 border rounded-xl outline-none">
+                <button onclick="loadBookings()" class="navy-gradient text-amber-300 px-4 py-2 rounded-xl text-xs font-bold">खोजें</button>
+            </div>
+        </div>
+        <div id="bookings-list" class="space-y-3"></div>
+    </section>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 inset-x-0 max-w-md mx-auto bg-white border-t border-slate-200 py-2 px-6 flex justify-between items-center z-50">
+        <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-amber-600 font-bold text-xs">
+            <i class="fa-solid fa-house text-base"></i><span>Home</span>
+        </button>
+        <button onclick="switchTab('booking')" id="nav-booking" class="flex flex-col items-center text-slate-500 text-xs">
+            <i class="fa-solid fa-clipboard-list text-base"></i><span>Booking</span>
+        </button>
+        <button onclick="switchTab('captain')" id="nav-captain" class="flex flex-col items-center text-slate-500 text-xs">
+            <i class="fa-solid fa-user-tie text-base"></i><span>Captain</span>
+        </button>
+        <a href="/admin.html" class="flex flex-col items-center text-slate-500 text-xs">
+            <i class="fa-solid fa-gear text-base"></i><span>Admin</span>
+        </a>
+    </nav>
+
+    <script>
+        let tripType = 'Outstation';
+        function setTrip(type) {
+            tripType = type;
+            document.getElementById('btn-outstation').className = type === 'Outstation' ? 'navy-gradient text-white py-2.5 px-2 rounded-xl border-2 gold-border shadow-md flex flex-col items-center' : 'bg-white text-slate-700 py-2.5 px-2 rounded-xl border border-slate-300 shadow-sm flex flex-col items-center';
+            document.getElementById('btn-local').className = type === 'Local' ? 'navy-gradient text-white py-2.5 px-2 rounded-xl border-2 gold-border shadow-md flex flex-col items-center' : 'bg-white text-slate-700 py-2.5 px-2 rounded-xl border border-slate-300 shadow-sm flex flex-col items-center';
+        }
+        function toggleStop() { document.getElementById('stop-box').classList.toggle('hidden'); }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = 'सेव हो रहा है...';
+            const vas = Array.from(document.querySelectorAll('input[name="vas"]:checked')).map(el => el.value).join(', ');
+            const payload = {
+                customer_name: document.getElementById('cust_name').value,
+                customer_phone: document.getElementById('cust_phone').value,
+                trip_type: tripType,
+                pickup_loc: document.getElementById('pickup').value,
+                stops: document.getElementById('stops').value || '',
+                drop_loc: document.getElementById('drop_loc').value,
+                journey_date: document.getElementById('journey_date').value,
+                journey_time: document.getElementById('journey_time').value,
+                car_model: document.getElementById('car_model').value,
+                transmission: document.getElementById('transmission').value,
+                vas_selected: vas
+            };
+            localStorage.setItem('ss_phone', payload.customer_phone);
+            try {
+                const res = await fetch('/api/bookings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                const data = await res.json();
+                alert('बुकिंग सफल! आपकी बुकिंग आईडी है: ' + data.booking_id);
+                switchTab('booking');
+            } catch (err) {
+                alert('अभी बैकएंड API फाइल जुड़ना बाकी है, पर UI तैयार है!');
+            } finally {
+                btn.innerText = 'Confirm Request';
+            }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-home').classList.toggle('hidden', tab !== 'home');
+            document.getElementById('tab-status').classList.toggle('hidden', tab === 'home');
+            if (tab !== 'home') {
+                const savedPhone = localStorage.getItem('ss_phone') || '';
+                document.getElementById('search_phone').value = savedPhone;
+                if (savedPhone) loadBookings();
+            }
+        }
+
+        async function loadBookings() {
+            const phone = document.getElementById('search_phone').value;
+            if (!phone) return;
+            localStorage.setItem('ss_phone', phone);
+            const box = document.getElementById('bookings-list');
+            box.innerHTML = '<p class="text-xs text-center text-slate-500">लोड हो रहा है...</p>';
+            try {
+                const res = await fetch('/api/bookings?phone=' + encodeURIComponent(phone));
+                const list = await res.json();
+                if (!list.length) { box.innerHTML = '<p class="text-xs text-center text-slate-500">कोई बुकिंग नहीं मिली।</p>'; return; }
+                box.innerHTML = list.map(b => `
+                    <div class="bg-white p-4 rounded-2xl shadow border-l-4 ${b.status === 'Assigned' ? 'border-emerald-500' : 'border-amber-500'} space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-900">#${b.booking_id} (${b.trip_type})</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${b.status === 'Assigned' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${b.status === 'Assigned' ? 'Driver Assigned' : '24-Hr Lock / Pending'}</span>
+                        </div>
+                        <p class="text-xs text-slate-700"><b>रूट:</b> ${b.pickup_loc} ➔ ${b.drop_loc}</p>
+                        <p class="text-[11px] text-slate-500">📅 ${b.journey_date} | ⏰ ${b.journey_time} | 🚗 ${b.car_model} (${b.transmission})</p>
+                        ${b.status === 'Assigned' ? `
+                            <div class="mt-2 p-3 navy-gradient text-white rounded-xl border gold-border">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs font-bold text-amber-300">👨‍✈️ कैप्टन: ${b.driver_name}</p>
+                                        <p class="text-[10px] text-slate-300">अनुभव: ${b.driver_exp} | ⭐ ${b.driver_rating}</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a href="tel:${b.driver_phone}" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-phone"></i> कॉल</a>
+                                        <a href="https://wa.me/91${b.driver_phone}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa-brands fa-whatsapp"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : `<p class="text-[11px] text-amber-700 bg-amber-50 p-2 rounded-lg">⏳ यात्रा से 24 घंटे पहले आपको वेरिफाइड कैप्टन असाइन कर दिया जाएगा।</p>`}
+                    </div>
+                `).join('');
+            } catch (e) {
+                box.innerHTML = '<p class="text-xs text-center text-red-500">डेटा लोड करने के लिए बैकएंड API जोड़ें।</p>';
+            }
+        }
+    </script>
+</body>
+</html>
