@@ -1,16 +1,8 @@
 {
   "name": "driver-booking",
-  "main": "worker.js",
   "compatibility_date": "2026-01-01",
+  "workers_dev": true,
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "safarsaathi-db",
-      "database_id": "703cc2cc-bc0b-4a6d-b716-69d259b2a3c5"
-    }
-  ]
+    "directory": "./public"
+  }
 }
