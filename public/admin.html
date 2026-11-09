@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafarSaathi - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen font-sans pb-16 max-w-2xl mx-auto">
+
+    <header class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg border-b-2 border-amber-400">
+        <div>
+            <h1 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-user-shield mr-2"></i>SafarSaathi Admin</h1>
+            <p class="text-xs text-slate-300">बुकिंग और कैप्टन (Driver) मैनेजमेंट</p>
+        </div>
+        <a href="/" class="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold">ऐप पर जाएं ➔</a>
+    </header>
+
+    <main class="p-4 space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-sm font-bold text-slate-800">सभी ग्राहक बुकिंग्स (Live Bookings)</h2>
+            <button onclick="loadAdminData()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+        </div>
+        <div id="admin-bookings" class="space-y-3">
+            <p class="text-xs text-slate-500 text-center py-6">बुकिंग लोड हो रही हैं...</p>
+        </div>
+    </main>
+
+    <script>
+        let driversList = [];
+
+        async function loadAdminData() {
+            const box = document.getElementById('admin-bookings');
+            try {
+                const [bRes, dRes] = await Promise.all([fetch('/api/bookings'), fetch('/api/drivers')]);
+                const bookings = await bRes.json();
+                driversList = await dRes.json();
+
+                if (!bookings.length) {
+                    box.innerHTML = '<div class="bg-white p-6 rounded-xl text-center text-xs text-slate-500">अभी कोई नई बुकिंग नहीं है।</div>';
+                    return;
+                }
+
+                box.innerHTML = bookings.map(b => `
+                    <div class="bg-white p-4 rounded-2xl shadow border-l-4 ${b.status === 'Assigned' ? 'border-emerald-500' : 'border-amber-500'} space-y-2.5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-extrabold bg-slate-900 text-amber-300 px-2 py-0.5 rounded">#${b.booking_id}</span>
+                                <span class="text-xs font-bold text-slate-800 ml-1">${b.customer_name} (${b.customer_phone})</span>
+                            </div>
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${b.status === 'Assigned' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${b.status}</span>
+                        </div>
+                        <div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl space-y-1">
+                            <p><b>ट्रिप:</b> ${b.trip_type} | <b>रूट:</b> ${b.pickup_loc} ${b.stops ? '➔ ' + b.stops : ''} ➔ ${b.drop_loc}</p>
+                            <p><b>समय:</b> 📅 ${b.journey_date} at ⏰ ${b.journey_time}</p>
+                            <p><b>गाड़ी:</b> 🚗 ${b.car_model} (<span class="font-bold text-blue-800">${b.transmission}</span>)</p>
+                            ${b.vas_selected ? `<p class="text-amber-700 font-semibold">✨ अतिरिक्त सेवा: ${b.vas_selected}</p>` : ''}
+                        </div>
+                        
+                        <div class="pt-2 border-t flex flex-col sm:flex-row gap-2 items-center justify-between">
+                            <select id="drv-${b.booking_id}" class="w-full sm:w-auto flex-1 text-xs p-2 border rounded-xl bg-slate-50">
+                                <option value="">-- कैप्टन (Driver) चुनें --</option>
+                                ${driversList.map((d, idx) => `<option value="${idx}" ${b.driver_name === d.name ? 'selected' : ''}>${d.name} (${d.transmission_skill} | ⭐${d.rating})</option>`).join('')}
+                            </select>
+                            <button onclick="assignDriver('${b.booking_id}', '${b.customer_phone}', '${b.pickup_loc}', '${b.journey_date}', '${b.journey_time}')" class="w-full sm:w-auto bg-slate-900 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold">
+                                <i class="fa-solid fa-check mr-1"></i>Assign & WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                box.innerHTML = '<p class="text-xs text-red-500 text-center">डेटाबेस कनेक्ट हो रहा है... कृपया wrangler.json में Database ID चेक करें।</p>';
+            }
+        }
+
+        async function assignDriver(bookingId, custPhone, pickup, date, time) {
+            const sel = document.getElementById('drv-' + bookingId).value;
+            if (sel === '') { alert('कृपया पहले लिस्ट से कैप्टन चुनें!'); return; }
+            const d = driversList[sel];
+
+            await fetch('/api/assign', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    driver_name: d.name,
+                    driver_phone: d.phone,
+                    driver_rating: d.rating,
+                    driver_exp: d.experience
+                })
+            });
+
+            alert('कैप्टन ' + d.name + ' असाइन हो गए हैं!');
+            loadAdminData();
+
+            const msg = `नमस्ते! *SafarSaathi* में आपकी बुकिंग (#${bookingId}) कन्फर्म हो गई है।\n\n👨‍✈️ *कैप्टन:* ${d.name} (⭐${d.rating})\n📞 *नंबर:* ${d.phone}\n📍 *पिकअप:* ${pickup}\n📅 *समय:* ${date}, ${time}\n\nसुरक्षित और सुखद यात्रा!`;
+            window.open(`https://wa.me/91${custPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>
