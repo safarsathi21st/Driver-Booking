@@ -88,7 +88,7 @@ export default {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             d.name, d.phone, d.experience || '3+ वर्ष', d.transmission_skill || 'Both',
-            d.dl_number || 'MP09-XXXX', d.pan_number || 'ABCDE1234F', d.kyc_id_ref || '[Aadhaar Redacted]',
+            d.dl_number || 'MP09-XXXX', d.pan_number || 'ABCDE1234F', d.kyc_id_ref || '[KYC Verified]',
             d.police_verified ? 1 : 0, d.kyc_status || 'Approved', 1
           ).run();
           return Response.json({ success: true });
@@ -164,7 +164,7 @@ export default {
         return Response.json({ success: true });
       }
 
-      // 7. DIRECT ROUTING: अगर कोई /captain.html खोले तो Worker खुद कैप्टन ऐप परोस देगा (कोई 404 नहीं आएगा!)
+      // 7. DIRECT ROUTING: कैप्टन ऐप सीधे Worker से परोसी जाएगी (404 खत्म!)
       if (url.pathname === '/captain' || url.pathname === '/captain.html') {
         return new Response(CAPTAIN_HTML, {
           headers: { 'Content-Type': 'text/html;charset=UTF-8' }
@@ -330,7 +330,7 @@ const CAPTAIN_HTML = `<!DOCTYPE html>
             document.getElementById('duty-bar').classList.remove('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('cap-name.innerText = `${currentCaptain.name} (⭐${currentCaptain.rating})`;
+            document.getElementById('cap-name').innerText = currentCaptain.name + ' (⭐' + currentCaptain.rating + ')';
             document.getElementById('wallet-bal').innerText = '₹' + (currentCaptain.wallet_balance || 0);
 
             const dutyBtn = document.getElementById('duty-toggle-btn');
