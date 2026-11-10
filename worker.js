@@ -76,7 +76,7 @@ export default {
         return Response.json(result.results);
       }
 
-      // 4. सभी ड्राइवर्स देखना या नया ड्राइवर/KYC जोड़ना (/api/drivers)
+      // 4. सभी ड्राइवर्स देखना या नया ड्राइवर जोड़ना (/api/drivers)
       if (url.pathname === '/api/drivers') {
         if (request.method === 'GET') {
           const res = await env.DB.prepare('SELECT * FROM drivers ORDER BY driver_id DESC').all();
@@ -96,7 +96,7 @@ export default {
         }
       }
 
-      // 5. ड्राइवर KYC अप्रूव, ब्लॉक/अनब्लॉक या ड्यूटी ऑन/ऑफ करना (POST /api/driver-action)
+      // 5. ड्राइवर एक्शन (POST /api/driver-action)
       if (url.pathname === '/api/driver-action' && request.method === 'POST') {
         const { driver_id, action, value } = await request.json();
         if (action === 'toggle_block') {
@@ -109,7 +109,7 @@ export default {
         return Response.json({ success: true });
       }
 
-      // 6. एडमिन द्वारा ड्राइवर असाइन करना (POST /api/assign)
+      // 6. ड्राइवर असाइन करना (POST /api/assign)
       if (url.pathname === '/api/assign' && request.method === 'POST') {
         const { booking_id, driver_id, driver_name, driver_phone, driver_rating, driver_exp, driver_dl, driver_verified } = await request.json();
         await env.DB.prepare(`
@@ -120,7 +120,7 @@ export default {
         return Response.json({ success: true });
       }
 
-      // 7. ट्रिप स्टेटस, OTP वेरिफिकेशन, एक्स्ट्रा टाइम कैलकुलेशन और SOS (POST /api/trip-action)
+      // 7. ट्रिप एक्शन, OTP, एक्स्ट्रा टाइम (POST /api/trip-action)
       if (url.pathname === '/api/trip-action' && request.method === 'POST') {
         const { booking_id, action, otp, extra_minutes } = await request.json();
         const b = await env.DB.prepare('SELECT * FROM bookings WHERE booking_id = ?').bind(booking_id).first();
@@ -165,8 +165,13 @@ export default {
         return Response.json({ success: true });
       }
 
+      // 8. राउटिंग: मुख्य पेज (/) खुलने पर index.html और (/captain.html) पर captain.html दिखाना
       if (url.pathname === '/' || url.pathname === '') {
         url.pathname = '/index.html';
+        return env.ASSETS.fetch(new Request(url.toString(), request));
+      }
+      if (url.pathname === '/captain' || url.pathname === '/captain.html') {
+        url.pathname = '/captain.html';
         return env.ASSETS.fetch(new Request(url.toString(), request));
       }
 
