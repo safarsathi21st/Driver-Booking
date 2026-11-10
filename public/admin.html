@@ -3,102 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafarSaathi - Admin Panel</title>
+    <title>SafarSaathi - Startup Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 min-h-screen font-sans pb-16 max-w-2xl mx-auto">
+<body class="bg-slate-100 min-h-screen font-sans pb-20">
 
-    <header class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg border-b-2 border-amber-400">
-        <div>
-            <h1 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-user-shield mr-2"></i>SafarSaathi Admin</h1>
-            <p class="text-xs text-slate-300">बुकिंग और कैप्टन (Driver) मैनेजमेंट</p>
+    <!-- PIN Lock Modal -->
+    <div id="pin-modal" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-xs w-full text-center shadow-2xl border-2 border-amber-400">
+            <div class="w-14 h-14 bg-slate-900 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-lg font-extrabold text-slate-900">Admin Command Center</h2>
+            <p class="text-xs text-slate-500 mb-4">सुरक्षा पिन डालें (डिफ़ॉल्ट PIN: <b>7860</b>)</p>
+            <input type="password" id="pin-input" placeholder="••••" class="w-full text-center text-xl tracking-widest font-bold p-3 border-2 rounded-xl mb-3 outline-none focus:border-amber-500">
+            <button onclick="verifyPin()" class="w-full bg-slate-900 text-amber-400 font-bold py-3 rounded-xl text-sm">Unlock Dashboard</button>
         </div>
-        <a href="/" class="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold">ऐप पर जाएं ➔</a>
+    </div>
+
+    <!-- Top Header -->
+    <header class="bg-slate-950 text-white p-4 sticky top-0 z-40 shadow-lg border-b-2 border-amber-400">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-lg sm:text-xl font-extrabold text-amber-400"><i class="fa-solid fa-satellite-dish mr-2"></i>SafarSaathi Command Center</h1>
+                <p class="text-[11px] text-slate-300">Live Fleet, Dynamic Pricing, KYC & GST Billing</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="loadAll()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-2 rounded-xl text-xs font-bold border border-amber-400/40">
+                    <i class="fa-solid fa-rotate mr-1"></i>Refresh
+                </button>
+                <a href="/" class="bg-amber-400 text-slate-950 px-3 py-2 rounded-xl text-xs font-extrabold">Customer App ➔</a>
+            </div>
+        </div>
     </header>
 
-    <main class="p-4 space-y-4">
-        <div class="flex justify-between items-center">
-            <h2 class="text-sm font-bold text-slate-800">सभी ग्राहक बुकिंग्स (Live Bookings)</h2>
-            <button onclick="loadAdminData()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+    <main class="max-w-5xl mx-auto p-4 space-y-5">
+
+        <!-- 1. LIVE FLEET & REVENUE MONITOR -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div class="bg-white p-3.5 rounded-2xl shadow border-l-4 border-emerald-500">
+                <p class="text-[11px] text-slate-500 font-semibold">🟢 Online Captains</p>
+                <h3 id="stat-online" class="text-2xl font-extrabold text-emerald-600">0</h3>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl shadow border-l-4 border-blue-600">
+                <p class="text-[11px] text-slate-500 font-semibold">🚗 Running Trips</p>
+                <h3 id="stat-running" class="text-2xl font-extrabold text-blue-700">0</h3>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl shadow border-l-4 border-amber-500">
+                <p class="text-[11px] text-slate-500 font-semibold">⏳ Pending / Assigned</p>
+                <h3 id="stat-pending" class="text-2xl font-extrabold text-amber-600">0</h3>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl shadow border-l-4 border-purple-600">
+                <p class="text-[11px] text-slate-500 font-semibold">💰 Gross Billing (incl. GST)</p>
+                <h3 id="stat-revenue" class="text-2xl font-extrabold text-slate-900">₹0</h3>
+            </div>
+            <div class="bg-slate-900 text-white p-3.5 rounded-2xl shadow border-l-4 border-amber-400 col-span-2 sm:col-span-1">
+                <p class="text-[11px] text-amber-300 font-semibold">🏦 Net Commission</p>
+                <h3 id="stat-commission" class="text-2xl font-extrabold text-amber-400">₹0</h3>
+            </div>
         </div>
-        <div id="admin-bookings" class="space-y-3">
-            <p class="text-xs text-slate-500 text-center py-6">बुकिंग लोड हो रही हैं...</p>
+
+        <!-- Navigation Tabs -->
+        <div class="flex gap-2 border-b border-slate-300 pb-2 overflow-x-auto">
+            <button onclick="switchTab('trips')" id="tabbtn-trips" class="bg-slate-900 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">
+                <i class="fa-solid fa-route mr-1"></i>1. Live Trips & Billing
+            </button>
+            <button onclick="switchTab('captains')" id="tabbtn-captains" class="bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border whitespace-nowrap">
+                <i class="fa-solid fa-id-card-clip mr-1"></i>2. Captain KYC & Block
+            </button>
+            <button onclick="switchTab('pricing')" id="tabbtn-pricing" class="bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border whitespace-nowrap">
+                <i class="fa-solid fa-sliders mr-1"></i>3. Dynamic Pricing & GST Report
+            </button>
         </div>
+
+        <!-- TAB 1: LIVE TRIPS, OTP & INVOICE -->
+        <section id="sec-trips" class="space-y-3">
+            <div id="bookings-container" class="space-y-3"></div>
+        </section>
+
+        <!-- TAB 2: CAPTAIN KYC & BLOCKING SYSTEM -->
+        <section id="sec-captains" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow border border-amber-300">
+                <h3 class="text-sm font-extrabold text-slate-900 mb-3"><i class="fa-solid fa-user-plus text-amber-600 mr-1"></i>नया कैप्टन ऑनबोर्ड करें (Digital KYC Form)</h3>
+                <form onsubmit="addCaptain(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <input type="text" id="d_name" required placeholder="कैप्टन का नाम" class="text-xs p-2.5 border rounded-xl">
+                    <input type="tel" id="d_phone" required pattern="[0-9]{10}" placeholder="10 अंकों का मोबाइल नंबर" class="text-xs p-2.5 border rounded-xl">
+                    <input type="text" id="d_exp" required placeholder="अनुभव (जैसे: 5+ वर्ष)" class="text-xs p-2.5 border rounded-xl">
+                    <input type="text" id="d_dl" required placeholder="DL नंबर (जैसे: MP09-2019-XXXX)" class="text-xs p-2.5 border rounded-xl">
+                    <input type="text" id="d_pan" required placeholder="PAN नंबर" class="text-xs p-2.5 border rounded-xl">
+                    <select id="d_skill" class="text-xs p-2.5 border rounded-xl bg-slate-50">
+                        <option value="Both">Both (Manual + Auto)</option>
+                        <option value="Manual">Only Manual</option>
+                        <option value="Automatic">Only Automatic</option>
+                    </select>
+                    <button type="submit" class="sm:col-span-3 bg-slate-900 text-amber-400 font-bold py-2.5 rounded-xl text-xs">
+                        + Verify & Add Captain to Fleet
+                    </button>
+                </form>
+            </div>
+
+            <div id="captains-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </section>
+
+        <!-- TAB 3: DYNAMIC PRICING, SURGE & GST EXPORT -->
+        <section id="sec-pricing" class="hidden space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900">⚡ डायनेमिक प्राइसिंग और कमीशन कंट्रोल</h3>
+                        <p class="text-[11px] text-slate-500">यहाँ से बदला गया रेट और कमीशन तुरंत नई बुकिंग्स पर लागू हो जाएगा</p>
+                    </div>
+                </div>
+                <form onsubmit="savePricing(event)" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600">Local 4 Hrs (₹)</label>
+                        <input type="number" id="s_local4" class="w-full text-xs p-2.5 border rounded-xl mt-1 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600">Local 8 Hrs (₹)</label>
+                        <input type="number" id="s_local8" class="w-full text-xs p-2.5 border rounded-xl mt-1 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600">Outstation 12 Hrs (₹)</label>
+                        <input type="number" id="s_out" class="w-full text-xs p-2.5 border rounded-xl mt-1 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600">Extra Time (₹/मिनट)</label>
+                        <input type="number" id="s_extra" class="w-full text-xs p-2.5 border rounded-xl mt-1 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-amber-700">कंपनी कमीशन (%)</label>
+                        <input type="number" id="s_comm" class="w-full text-xs p-2.5 border-2 border-amber-400 rounded-xl mt-1 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600">GST टैक्स (%)</label>
+                        <input type="number" id="s_gst" class="w-full text-xs p-2.5 border rounded-xl mt-1 font-bold">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-[11px] font-bold text-rose-600">🔥 पीक आवर्स / बारिश Surge Multiplier</label>
+                        <select id="s_surge" class="w-full text-xs p-2.5 border-2 border-rose-300 rounded-xl mt-1 font-bold bg-rose-50">
+                            <option value="1">1.0x (सामान्य रेट - No Surge)</option>
+                            <option value="1.2">1.2x (+20% पीक डिमांड)</option>
+                            <option value="1.5">1.5x (+50% बारिश / त्योहार सर्ज)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="col-span-2 sm:col-span-4 bg-slate-900 text-amber-400 font-bold py-3 rounded-xl text-xs">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i>Save Dynamic Pricing & Commission
+                    </button>
+                </form>
+            </div>
+
+            <!-- GST & Accounting Export -->
+            <div class="bg-slate-900 text-white p-5 rounded-2xl shadow flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div>
+                    <h4 class="text-sm font-bold text-amber-400"><i class="fa-solid fa-file-invoice-dollar mr-1"></i>ऑटोमेटेड GST और कमीशन रिपोर्ट (Excel/CSV)</h4>
+                    <p class="text-xs text-slate-300">सभी ट्रिप्स का Base Fare, Extra Time, 5% GST, Company Commission और Driver Payout डाउनलोड करें।</p>
+                </div>
+                <button onclick="exportGSTReport()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl text-xs whitespace-nowrap">
+                    <i class="fa-solid fa-download mr-1"></i>Download GST Excel (CSV)
+                </button>
+            </div>
+        </section>
+
     </main>
 
     <script>
-        let driversList = [];
+        let allBookings = [];
+        let allDrivers = [];
+        let sysSettings = {};
 
-        async function loadAdminData() {
-            const box = document.getElementById('admin-bookings');
+        function verifyPin() {
+            const val = document.getElementById('pin-input').value;
+            if (val === (sysSettings.admin_pin || '7860')) {
+                document.getElementById('pin-modal').classList.add('hidden');
+                sessionStorage.setItem('ss_admin_ok', '1');
+            } else {
+                alert('गलत पिन! डिफ़ॉल्ट पिन 7860 है।');
+            }
+        }
+        if (sessionStorage.getItem('ss_admin_ok') === '1') {
+            document.getElementById('pin-modal').classList.add('hidden');
+        }
+
+        function switchTab(tab) {
+            ['trips', 'captains', 'pricing'].forEach(t => {
+                document.getElementById('sec-' + t).classList.toggle('hidden', t !== tab);
+                document.getElementById('tabbtn-' + t).className = t === tab
+                    ? 'bg-slate-900 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap'
+                    : 'bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border whitespace-nowrap';
+            });
+        }
+
+        async function loadAll() {
             try {
-                const [bRes, dRes] = await Promise.all([fetch('/api/bookings'), fetch('/api/drivers')]);
-                const bookings = await bRes.json();
-                driversList = await dRes.json();
+                const [bRes, dRes, sRes] = await Promise.all([
+                    fetch('/api/bookings'),
+                    fetch('/api/drivers'),
+                    fetch('/api/settings')
+                ]);
+                allBookings = await bRes.json();
+                allDrivers = await dRes.json();
+                sysSettings = await sRes.json();
 
-                if (!bookings.length) {
-                    box.innerHTML = '<div class="bg-white p-6 rounded-xl text-center text-xs text-slate-500">अभी कोई नई बुकिंग नहीं है।</div>';
-                    return;
-                }
-
-                box.innerHTML = bookings.map(b => `
-                    <div class="bg-white p-4 rounded-2xl shadow border-l-4 ${b.status === 'Assigned' ? 'border-emerald-500' : 'border-amber-500'} space-y-2.5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-extrabold bg-slate-900 text-amber-300 px-2 py-0.5 rounded">#${b.booking_id}</span>
-                                <span class="text-xs font-bold text-slate-800 ml-1">${b.customer_name} (${b.customer_phone})</span>
-                            </div>
-                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${b.status === 'Assigned' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${b.status}</span>
-                        </div>
-                        <div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl space-y-1">
-                            <p><b>ट्रिप:</b> ${b.trip_type} | <b>रूट:</b> ${b.pickup_loc} ${b.stops ? '➔ ' + b.stops : ''} ➔ ${b.drop_loc}</p>
-                            <p><b>समय:</b> 📅 ${b.journey_date} at ⏰ ${b.journey_time}</p>
-                            <p><b>गाड़ी:</b> 🚗 ${b.car_model} (<span class="font-bold text-blue-800">${b.transmission}</span>)</p>
-                            ${b.vas_selected ? `<p class="text-amber-700 font-semibold">✨ अतिरिक्त सेवा: ${b.vas_selected}</p>` : ''}
-                        </div>
-                        
-                        <div class="pt-2 border-t flex flex-col sm:flex-row gap-2 items-center justify-between">
-                            <select id="drv-${b.booking_id}" class="w-full sm:w-auto flex-1 text-xs p-2 border rounded-xl bg-slate-50">
-                                <option value="">-- कैप्टन (Driver) चुनें --</option>
-                                ${driversList.map((d, idx) => `<option value="${idx}" ${b.driver_name === d.name ? 'selected' : ''}>${d.name} (${d.transmission_skill} | ⭐${d.rating})</option>`).join('')}
-                            </select>
-                            <button onclick="assignDriver('${b.booking_id}', '${b.customer_phone}', '${b.pickup_loc}', '${b.journey_date}', '${b.journey_time}')" class="w-full sm:w-auto bg-slate-900 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold">
-                                <i class="fa-solid fa-check mr-1"></i>Assign & WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                box.innerHTML = '<p class="text-xs text-red-500 text-center">डेटाबेस कनेक्ट हो रहा है... कृपया wrangler.json में Database ID चेक करें।</p>';
+                renderStats();
+                renderBookings();
+                renderCaptains();
+                fillPricingForm();
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        async function assignDriver(bookingId, custPhone, pickup, date, time) {
-            const sel = document.getElementById('drv-' + bookingId).value;
-            if (sel === '') { alert('कृपया पहले लिस्ट से कैप्टन चुनें!'); return; }
-            const d = driversList[sel];
+        function renderStats() {
+            const onlineCount = allDrivers.filter(d => d.is_available === 1 && d.is_blocked === 0 && d.kyc_status === 'Approved').length;
+            const runningCount = allBookings.filter(b => b.status === 'Running').length;
+            const pendingCount = allBookings.filter(b => b.status === 'Pending' || b.status === 'Assigned').length;
+            const activeBookings = allBookings.filter(b => b.status !== 'Cancelled');
+            const grossRev = activeBookings.reduce((s, b) => s + Number(b.total_bill || 0), 0);
+            const netComm = activeBookings.reduce((s, b) => s + Number(b.commission_amount || 0), 0);
+
+            document.getElementById('stat-online').innerText = onlineCount;
+            document.getElementById('stat-running').innerText = runningCount;
+            document.getElementById('stat-pending').innerText = pendingCount;
+            document.getElementById('stat-revenue').innerText = '₹' + grossRev;
+            document.getElementById('stat-commission').innerText = '₹' + netComm;
+        }
+
+        function renderBookings() {
+            const box = document.getElementById('bookings-container');
+            if (!allBookings.length) {
+                box.innerHTML = '<div class="bg-white p-6 rounded-2xl text-center text-xs text-slate-500">अभी कोई बुकिंग नहीं है।</div>';
+                return;
+            }
+            const eligibleDrivers = allDrivers.filter(d => d.is_blocked === 0 && d.kyc_status === 'Approved' && d.is_available === 1);
+
+            box.innerHTML = allBookings.map(b => `
+                <div class="bg-white p-4 rounded-2xl shadow border-l-4 ${b.sos_alert ? 'border-red-600 bg-red-50/30' : b.status === 'Completed' ? 'border-emerald-600' : b.status === 'Running' ? 'border-blue-600' : 'border-amber-500'} space-y-3">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <div>
+                            <span class="text-xs font-extrabold bg-slate-900 text-amber-300 px-2.5 py-1 rounded-lg">#${b.booking_id}</span>
+                            <span class="text-xs font-bold text-slate-900 ml-1">${b.customer_name} (${b.customer_phone})</span>
+                            ${b.sos_alert ? '<span class="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full ml-1 animate-pulse">🚨 SOS ALERT</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border">Status: ${b.status}</span>
+                            <span class="text-xs font-extrabold text-emerald-700">कुल बिल: ₹${b.total_bill}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs bg-slate-50 p-3 rounded-xl border">
+                        <div>
+                            <p><b>पैकेज:</b> ${b.trip_type} (${b.package_hours || 4} Hrs)</p>
+                            <p><b>रूट:</b> ${b.pickup_loc} ➔ ${b.drop_loc}</p>
+                            <p><b>समय:</b> 📅 ${b.journey_date} | ⏰ ${b.journey_time}</p>
+                        </div>
+                        <div>
+                            <p><b>कार:</b> 🚗 ${b.car_model} (${b.transmission})</p>
+                            <p><b>OTP Lock:</b> Start: <span class="font-bold text-blue-700">${b.start_otp || '----'}</span> | End: <span class="font-bold text-emerald-700">${b.end_otp || '----'}</span></p>
+                            <p><b>समय लॉग:</b> ${b.start_time || '--'} से ${b.end_time || '--'}</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg border">
+                            <p>Base: ₹${b.base_fare} | Extra (${b.extra_minutes || 0}m): ₹${b.extra_fare || 0}</p>
+                            <p>GST: ₹${b.gst_amount} | <b>Total: ₹${b.total_bill}</b></p>
+                            <p class="text-amber-700 font-bold">कमीशन: ₹${b.commission_amount} | ड्राइवर: ₹${b.driver_earning}</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions Row -->
+                    <div class="flex flex-wrap gap-2 items-center justify-between pt-1">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="drv-${b.booking_id}" class="text-xs p-2 border rounded-xl bg-slate-50">
+                                <option value="">-- Online Verified Captain चुनें --</option>
+                                ${eligibleDrivers.map(d => `<option value="${d.driver_id}" ${b.driver_id === d.driver_id ? 'selected' : ''}>🟢 ${d.name} (${d.transmission_skill} | ⭐${d.rating})</option>`).join('')}
+                            </select>
+                            <button onclick="assignCaptain('${b.booking_id}')" class="bg-slate-900 text-amber-400 px-3 py-2 rounded-xl text-xs font-bold">
+                                Assign Captain
+                            </button>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5">
+                            ${b.status === 'Assigned' ? `
+                                <button onclick="startTripPrompt('${b.booking_id}', '${b.start_otp}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
+                                    ▶️ Start Trip (OTP)
+                                </button>
+                            ` : ''}
+                            ${b.status === 'Running' ? `
+                                <button onclick="completeTripPrompt('${b.booking_id}', '${b.end_otp}')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
+                                    ⏹️ End Trip & Calculate Extra Time
+                                </button>
+                            ` : ''}
+                            <button onclick="sendWhatsAppInvoice('${b.booking_id}')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
+                                <i class="fa-brands fa-whatsapp mr-1"></i>Send GST Invoice
+                            </button>
+                            ${b.status !== 'Completed' && b.status !== 'Cancelled' ? `
+                                <button onclick="cancelBooking('${b.booking_id}')" class="bg-rose-100 text-rose-700 px-2.5 py-1.5 rounded-xl text-xs font-bold">Cancel</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCaptains() {
+            const box = document.getElementById('captains-container');
+            box.innerHTML = allDrivers.map(d => `
+                <div class="bg-white p-4 rounded-2xl shadow border-l-4 ${d.is_blocked ? 'border-rose-600 opacity-75' : d.kyc_status === 'Approved' ? 'border-emerald-500' : 'border-amber-500'} space-y-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="text-sm font-extrabold text-slate-900">${d.name} <span class="text-xs font-normal text-slate-500">(${d.phone})</span></h4>
+                            <p class="text-[11px] text-slate-600">Skill: <b>${d.transmission_skill}</b> | Exp: ${d.experience} | ⭐ ${d.rating}</p>
+                        </div>
+                        <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${d.is_blocked ? 'bg-rose-100 text-rose-700' : d.kyc_status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${d.is_blocked ? '🚫 BLOCKED' : d.kyc_status === 'Approved' ? '✔ Police Verified' : '⏳ KYC Pending'}
+                        </span>
+                    </div>
+                    <div class="text-[11px] bg-slate-50 p-2.5 rounded-xl border space-y-0.5">
+                        <p><b>DL No:</b> ${d.dl_number || 'N/A'} | <b>PAN:</b> ${d.pan_number || 'N/A'}</p>
+                        <p><b>Wallet Earnings:</b> <span class="text-emerald-700 font-bold">₹${d.wallet_balance || 0}</span> | <b>Duty:</b> ${d.is_available ? '🟢 Online' : '⚪ Offline'}</p>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        ${d.kyc_status !== 'Approved' ? `
+                            <button onclick="driverAction(${d.driver_id}, 'approve_kyc', 1)" class="flex-1 bg-emerald-600 text-white py-1.5 rounded-xl text-xs font-bold">
+                                ✔ Approve KYC & Verify
+                            </button>
+                        ` : ''}
+                        <button onclick="driverAction(${d.driver_id}, 'toggle_duty', ${d.is_available ? 0 : 1})" class="flex-1 bg-slate-100 text-slate-800 py-1.5 rounded-xl text-xs font-bold border">
+                            ${d.is_available ? 'Set Offline' : 'Set Online'}
+                        </button>
+                        <button onclick="driverAction(${d.driver_id}, 'toggle_block', ${d.is_blocked ? 0 : 1})" class="flex-1 ${d.is_blocked ? 'bg-amber-500 text-white' : 'bg-rose-600 text-white'} py-1.5 rounded-xl text-xs font-bold">
+                            ${d.is_blocked ? 'Unblock ID' : '🚫 Block ID'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function fillPricingForm() {
+            if (!sysSettings) return;
+            document.getElementById('s_local4').value = sysSettings.local_4hr_rate ?? 499;
+            document.getElementById('s_local8').value = sysSettings.local_8hr_rate ?? 899;
+            document.getElementById('s_out').value = sysSettings.outstation_day_rate ?? 1199;
+            document.getElementById('s_extra').value = sysSettings.extra_min_rate ?? 2;
+            document.getElementById('s_comm').value = sysSettings.commission_pct ?? 20;
+            document.getElementById('s_gst').value = sysSettings.gst_pct ?? 5;
+            document.getElementById('s_surge').value = String(sysSettings.surge_multiplier ?? 1);
+        }
+
+        async function savePricing(e) {
+            e.preventDefault();
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    local_4hr_rate: document.getElementById('s_local4').value,
+                    local_8hr_rate: document.getElementById('s_local8').value,
+                    outstation_day_rate: document.getElementById('s_out').value,
+                    extra_min_rate: document.getElementById('s_extra').value,
+                    commission_pct: document.getElementById('s_comm').value,
+                    gst_pct: document.getElementById('s_gst').value,
+                    surge_multiplier: document.getElementById('s_surge').value
+                })
+            });
+            alert('डायनेमिक प्राइसिंग, कमीशन और Surge सफलतापूर्वक अपडेट हो गए!');
+            loadAll();
+        }
+
+        async function addCaptain(e) {
+            e.preventDefault();
+            await fetch('/api/drivers', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: document.getElementById('d_name').value,
+                    phone: document.getElementById('d_phone').value,
+                    experience: document.getElementById('d_exp').value,
+                    dl_number: document.getElementById('d_dl').value,
+                    pan_number: document.getElementById('d_pan').value,
+                    transmission_skill: document.getElementById('d_skill').value,
+                    police_verified: 1,
+                    kyc_status: 'Approved'
+                })
+            });
+            e.target.reset();
+            loadAll();
+        }
+
+        async function driverAction(driver_id, action, value) {
+            await fetch('/api/driver-action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ driver_id, action, value })
+            });
+            loadAll();
+        }
+
+        async function assignCaptain(booking_id) {
+            const drvId = Number(document.getElementById('drv-' + booking_id).value);
+            if (!drvId) return alert('कृपया पहले लिस्ट से एक Online Verified कैप्टन चुनें!');
+            const d = allDrivers.find(x => x.driver_id === drvId);
+            const b = allBookings.find(x => x.booking_id === booking_id);
 
             await fetch('/api/assign', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    booking_id: bookingId,
+                    booking_id,
+                    driver_id: d.driver_id,
                     driver_name: d.name,
                     driver_phone: d.phone,
                     driver_rating: d.rating,
-                    driver_exp: d.experience
+                    driver_exp: d.experience,
+                    driver_dl: d.dl_number,
+                    driver_verified: d.police_verified
                 })
             });
+            loadAll();
 
-            alert('कैप्टन ' + d.name + ' असाइन हो गए हैं!');
-            loadAdminData();
-
-            const msg = `नमस्ते! *SafarSaathi* में आपकी बुकिंग (#${bookingId}) कन्फर्म हो गई है।\n\n👨‍✈️ *कैप्टन:* ${d.name} (⭐${d.rating})\n📞 *नंबर:* ${d.phone}\n📍 *पिकअप:* ${pickup}\n📅 *समय:* ${date}, ${time}\n\nसुरक्षित और सुखद यात्रा!`;
-            window.open(`https://wa.me/91${custPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+            const msg = `नमस्ते ${b.customer_name} जी! *SafarSaathi* में आपकी बुकिंग (*#${b.booking_id}*) कन्फर्म हो गई है।\n\n🛡️ *100% Police Verified Captain:*\n👨‍✈️ *नाम:* ${d.name} (⭐${d.rating} | ${d.experience})\n🪪 *DL No:* ${d.dl_number}\n📞 *संपर्क:* ${d.phone}\n\n🔑 *Start OTP:* *${b.start_otp}* (कैप्टन के आने पर ही दें)\n🏁 *End OTP:* *${b.end_otp}*\n💰 *अनुमानित बिल (incl. GST):* ₹${b.total_bill}`;
+            window.open(`https://wa.me/91${b.customer_phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        loadAdminData();
+        async function startTripPrompt(booking_id, expectedOtp) {
+            const otp = prompt(`ग्राहक से प्राप्त 4-डिजिट Start OTP डालें (Hint: ${expectedOtp}):`, expectedOtp);
+            if (!otp) return;
+            const res = await fetch('/api/trip-action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ booking_id, action: 'start_trip', otp })
+            });
+            const data = await res.json();
+            if (data.error) alert(data.error);
+            loadAll();
+        }
+
+        async function completeTripPrompt(booking_id, expectedOtp) {
+            const otp = prompt(`ग्राहक से प्राप्त 4-डिजिट End OTP डालें (Hint: ${expectedOtp}):`, expectedOtp);
+            if (!otp) return;
+            const extra_minutes = prompt('पैकेज समय से कितने अतिरिक्त मिनट (Extra Minutes) लगे? (अगर समय पर खत्म हुई तो 0 लिखें):', '0');
+            const res = await fetch('/api/trip-action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ booking_id, action: 'complete_trip', otp, extra_minutes })
+            });
+            const data = await res.json();
+            if (data.error) alert(data.error);
+            loadAll();
+        }
+
+        async function cancelBooking(booking_id) {
+            if (!confirm('क्या आप वाकई यह बुकिंग कैंसिल करना चाहते हैं?')) return;
+            await fetch('/api/trip-action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ booking_id, action: 'cancel_trip' })
+            });
+            loadAll();
+        }
+
+        function sendWhatsAppInvoice(booking_id) {
+            const b = allBookings.find(x => x.booking_id === booking_id);
+            const msg = `🧾 *SAFARSATHI DIGITAL TAX INVOICE*\n----------------------------------\n*Booking ID:* #${b.booking_id}\n*Customer:* ${b.customer_name}\n*Route:* ${b.pickup_loc} ➔ ${b.drop_loc}\n*Captain:* ${b.driver_name || 'Assigned'} (DL: ${b.driver_dl || 'Verified'})\n----------------------------------\n*Base Package (${b.package_hours || 4} Hrs):* ₹${b.base_fare}\n*Extra Time (${b.extra_minutes || 0} Mins):* ₹${b.extra_fare || 0}\n*GST (${sysSettings.gst_pct || 5}%):* ₹${b.gst_amount}\n----------------------------------\n💰 *TOTAL PAYABLE: ₹${b.total_bill}*\n----------------------------------\nधन्यवाद! सुरक्षित यात्रा के लिए फिर सेवा का मौका दें।`;
+            window.open(`https://wa.me/91${b.customer_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function exportGSTReport() {
+            const headers = ['Booking_ID','Date','Customer','Phone','Trip_Type','Base_Fare','Extra_Mins','Extra_Fare','GST_Amount','Total_Bill','Company_Commission','Driver_Payout','Status'];
+            const rows = allBookings.map(b => [
+                b.booking_id, b.journey_date, `"${b.customer_name}"`, b.customer_phone, b.trip_type,
+                b.base_fare, b.extra_minutes, b.extra_fare, b.gst_amount, b.total_bill, b.commission_amount, b.driver_earning, b.status
+            ]);
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `SafarSaathi_GST_Report_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        loadAll();
     </script>
 </body>
 </html>
