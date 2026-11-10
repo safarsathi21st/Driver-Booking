@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafarSaathi Captain Partner App</title>
+    <title>SafarSaathi - Captain Partner App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,12 +13,12 @@
 </head>
 <body class="bg-slate-100 font-sans pb-24 max-w-md mx-auto shadow-2xl min-h-screen relative">
 
-    <!-- Top Header -->
+    <!-- Top Header & Live Duty Bar -->
     <header class="navy-grad text-white p-4 rounded-b-3xl shadow-lg border-b-2 gold-border">
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-extrabold italic">Safar<span class="text-amber-400">Saathi</span> <span class="text-xs bg-amber-400 text-slate-950 px-2 py-0.5 rounded font-bold not-italic">CAPTAIN</span></h1>
-                <p id="header-sub" class="text-[11px] text-slate-300 mt-0.5">पार्टनर ड्यूटी और वॉलेट पोर्टल</p>
+                <p class="text-[11px] text-slate-300 mt-0.5">प्रोफेशनल ड्राइवर पार्टनर कमांड सेंटर</p>
             </div>
             <button id="logout-btn" onclick="logoutCaptain()" class="hidden text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl text-amber-300 border border-amber-400/40">
                 <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
@@ -31,7 +31,7 @@
                 <img id="cap-photo" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-10 h-10 rounded-full border-2 border-amber-400">
                 <div>
                     <h2 id="cap-name" class="text-sm font-bold text-white leading-tight">कैप्टन</h2>
-                    <span id="cap-badge" class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-shield-check mr-1"></i>Police Verified</span>
+                    <span class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-shield-check mr-1"></i>Police Verified Captain</span>
                 </div>
             </div>
             <button id="duty-toggle-btn" onclick="toggleDuty()" class="px-4 py-2 rounded-xl text-xs font-extrabold shadow transition">
@@ -42,17 +42,16 @@
 
     <!-- 1. LOGIN & DIGITAL KYC ONBOARDING SCREEN -->
     <section id="auth-screen" class="p-4 space-y-4">
-        <!-- Login Box -->
         <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200 space-y-3">
-            <h2 class="text-sm font-extrabold text-slate-900"><i class="fa-solid fa-steering-wheel text-amber-500 mr-1.5"></i>कैप्टन लॉगिन (Captain Login)</h2>
-            <p class="text-[11px] text-slate-500">अपना रजिस्टर्ड 10 अंकों का मोबाइल नंबर डालें (डेमो के लिए: <b>9876543210</b>)</p>
+            <h2 class="text-sm font-extrabold text-slate-900"><i class="fa-solid fa-steering-wheel text-amber-500 mr-1.5"></i>कैप्टन पार्टनर लॉगिन</h2>
+            <p class="text-[11px] text-slate-500">रजिस्टर्ड मोबाइल नंबर डालें (डेमो के लिए: <b>9876543210</b>)</p>
             <input type="tel" id="login_phone" placeholder="मोबाइल नंबर (जैसे: 9876543210)" class="w-full text-xs p-3 border rounded-xl outline-none focus:border-amber-500 font-bold">
             <button onclick="loginCaptain()" class="w-full navy-grad text-amber-400 font-bold py-3 rounded-xl text-xs border gold-border shadow">
                 लॉगिन करें (Open Duty Dashboard) ➔
             </button>
         </div>
 
-        <!-- Self KYC Onboarding Box -->
+        <!-- Digital KYC Self Onboarding -->
         <div class="bg-white p-5 rounded-2xl shadow-md border border-amber-300 space-y-3">
             <div class="flex justify-between items-center">
                 <h3 class="text-sm font-extrabold text-slate-900"><i class="fa-solid fa-id-card text-blue-900 mr-1.5"></i>नए कैप्टन बनें (Digital KYC)</h3>
@@ -71,10 +70,6 @@
                 </div>
                 <input type="text" id="reg_dl" required placeholder="Driving License नंबर (जैसे: MP09-2019-XXXX)" class="w-full text-xs p-2.5 border rounded-xl">
                 <input type="text" id="reg_pan" required placeholder="PAN Card नंबर" class="w-full text-xs p-2.5 border rounded-xl">
-                <div class="bg-slate-50 p-2.5 rounded-xl border border-dashed border-slate-300 text-[11px] text-slate-600">
-                    <label class="block font-bold mb-1"><i class="fa-solid fa-cloud-arrow-up mr-1 text-blue-800"></i>DL और पुलिस वेरिफिकेशन फोटो (Optional Link/File):</label>
-                    <input type="file" accept="image/*" class="text-[10px] w-full">
-                </div>
                 <button type="submit" class="w-full bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-xs shadow">
                     KYC डॉक्यूमेंट सबमिट करें
                 </button>
@@ -82,15 +77,12 @@
         </div>
     </section>
 
-    <!-- 2. MAIN CAPTAIN DASHBOARD (Visible after Login) -->
+    <!-- 2. MAIN CAPTAIN DASHBOARD -->
     <main id="dashboard-screen" class="hidden p-4 space-y-4">
-
-        <!-- Blocked / Pending KYC Alert -->
         <div id="kyc-alert" class="hidden p-4 rounded-2xl text-xs font-bold"></div>
 
         <!-- TAB A: DUTY & TRIPS -->
         <div id="tab-duty" class="space-y-4">
-            <!-- New Open Ride Requests (Before Accepting) -->
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-bell text-amber-500 mr-1"></i>नई ड्यूटी ऑफर्स (Open Requests)</h3>
@@ -99,7 +91,6 @@
                 <div id="open-requests-box" class="space-y-2.5"></div>
             </div>
 
-            <!-- Active Assigned / Running Trips -->
             <div>
                 <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2"><i class="fa-solid fa-car-on text-emerald-600 mr-1"></i>मेरी चालू ड्यूटी (My Active Trips)</h3>
                 <div id="my-active-trips" class="space-y-3"></div>
@@ -125,10 +116,9 @@
                 <div id="completed-history" class="space-y-2"></div>
             </div>
         </div>
-
     </main>
 
-    <!-- Bottom Navigation (Visible after login) -->
+    <!-- Bottom Navigation -->
     <nav id="bottom-nav" class="hidden fixed bottom-0 inset-x-0 max-w-md mx-auto bg-white border-t border-slate-200 py-2.5 px-8 flex justify-around items-center z-50">
         <button onclick="switchCapTab('duty')" id="nav-duty" class="flex flex-col items-center text-amber-600 font-bold text-xs">
             <i class="fa-solid fa-steering-wheel text-base"></i><span>Duty & OTP</span>
@@ -179,7 +169,7 @@
                     kyc_status: 'Pending'
                 })
             });
-            alert('आपका डिजिटल KYC फॉर्म जमा हो गया है! एडमिन द्वारा डॉक्यूमेंट वेरिफाई करते ही आपकी ड्यूटी चालू हो जाएगी।');
+            alert('आपका डिजिटल KYC फॉर्म जमा हो गया है! एडमिन द्वारा अप्रूव होते ही ड्यूटी चालू हो जाएगी।');
             document.getElementById('login_phone').value = phone;
             loginCaptain();
         }
@@ -194,7 +184,7 @@
 
             currentCaptain = drivers.find(d => d.phone === phone);
             if (!currentCaptain) {
-                alert('इस नंबर से कोई कैप्टन अकाउंट नहीं मिला। कृपया नीचे दिए गए KYC फॉर्म से रजिस्टर करें या डेमो नंबर 9876543210 डालें।');
+                alert('अकाउंट नहीं मिला। डेमो नंबर 9876543210 ट्राई करें।');
                 localStorage.removeItem('ss_cap_phone');
                 return;
             }
@@ -220,12 +210,12 @@
             const alertBox = document.getElementById('kyc-alert');
             if (currentCaptain.is_blocked === 1) {
                 alertBox.className = 'bg-rose-100 text-rose-800 border border-rose-400 p-4 rounded-2xl text-xs font-bold';
-                alertBox.innerHTML = '🚫 आपकी आईडी एडमिन द्वारा ब्लॉक कर दी गई है। कृपया ऑफिस में संपर्क करें।';
+                alertBox.innerHTML = '🚫 आपकी आईडी एडमिन द्वारा ब्लॉक कर दी गई है।';
                 alertBox.classList.remove('hidden');
                 return;
             } else if (currentCaptain.kyc_status !== 'Approved') {
                 alertBox.className = 'bg-amber-100 text-amber-900 border border-amber-400 p-4 rounded-2xl text-xs font-bold';
-                alertBox.innerHTML = '⏳ आपका पुलिस वेरिफिकेशन और डॉक्यूमेंट KYC अभी एडमिन के पास जांच में (Pending) है। अप्रूव होते ही आपको बुकिंग्स दिखने लगेंगी।';
+                alertBox.innerHTML = '⏳ आपका पुलिस वेरिफिकेशन और KYC अभी एडमिन के पास जांच में (Pending) है।';
                 alertBox.classList.remove('hidden');
                 return;
             } else {
@@ -251,7 +241,7 @@
                         <div class="bg-white p-4 rounded-2xl shadow border-2 border-amber-400 space-y-2.5">
                             <div class="flex justify-between items-center">
                                 <span class="text-xs font-extrabold bg-slate-900 text-amber-300 px-2.5 py-0.5 rounded">#${b.booking_id} • ${b.trip_type} (${b.package_hours || 4} Hrs)</span>
-                                <span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-300">आपकी कमाई: ₹${b.driver_earning || 400}</span>
+                                <span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-300">कमाई: ₹${b.driver_earning || 400}</span>
                             </div>
                             <div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl space-y-1">
                                 <p><b>📍 पिकअप:</b> ${b.pickup_loc}</p>
@@ -283,11 +273,10 @@
                         <div class="text-xs bg-slate-50 p-3 rounded-xl border space-y-1">
                             <p><b>📍 पिकअप:</b> ${b.pickup_loc} ➔ ${b.drop_loc}</p>
                             <p><b>🚗 कार:</b> ${b.car_model} (${b.transmission}) | <b>पैकेज:</b> ${b.package_hours || 4} Hrs</p>
-                            <p><b>📞 ग्राहक नंबर:</b> <span class="font-mono text-slate-500">+91 ••••• •••${String(b.customer_phone).slice(-2)} (Number Masked)</span></p>
-                            <p class="text-emerald-700 font-bold">💰 आपकी तय कमाई: ₹${b.driver_earning} (+ एक्स्ट्रा टाइम)</p>
+                            <p><b>📞 ग्राहक नंबर:</b> <span class="font-mono text-slate-500">+91 ••••• •••${String(b.customer_phone).slice(-2)} (Protected)</span></p>
+                            <p class="text-emerald-700 font-bold">💰 तय कमाई: ₹${b.driver_earning} (+ एक्स्ट्रा टाइम)</p>
                         </div>
 
-                        <!-- In-App Navigation & Masked Calling -->
                         <div class="grid grid-cols-2 gap-2">
                             <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.pickup_loc)}" target="_blank" class="bg-blue-50 text-blue-800 border border-blue-200 py-2 rounded-xl text-xs font-bold text-center">
                                 <i class="fa-solid fa-location-arrow mr-1"></i>Map Navigation
@@ -297,10 +286,9 @@
                             </a>
                         </div>
 
-                        <!-- Start / End OTP Input Box -->
                         ${b.status === 'Assigned' ? `
                             <div class="bg-amber-50 p-3 rounded-xl border border-amber-300 space-y-2">
-                                <label class="text-[11px] font-bold text-amber-900 block">🔑 ग्राहक से 4-डिजिट Start OTP लेकर मीटर चालू करें:</label>
+                                <label class="text-[11px] font-bold text-amber-900 block">🔑 ग्राहक से 4-डिजिट Start OTP लें:</label>
                                 <div class="flex gap-2">
                                     <input type="text" id="sotp-${b.booking_id}" maxlength="4" placeholder="Start OTP" class="flex-1 text-center font-bold text-sm p-2 border rounded-xl">
                                     <button onclick="verifyStartOTP('${b.booking_id}')" class="navy-grad text-amber-400 px-4 py-2 rounded-xl text-xs font-bold">
@@ -310,13 +298,13 @@
                             </div>
                         ` : `
                             <div class="bg-blue-50 p-3 rounded-xl border border-blue-300 space-y-2">
-                                <p class="text-[11px] font-bold text-blue-900">⏱️ ट्रिप शुरू हुई: <b>${b.start_time || 'अभी'}</b></p>
+                                <p class="text-[11px] font-bold text-blue-900">⏱️ ट्रिप शुरू: <b>${b.start_time || 'अभी'}</b></p>
                                 <div class="grid grid-cols-2 gap-2">
                                     <input type="number" id="extramin-${b.booking_id}" value="0" min="0" placeholder="Extra Mins" class="text-xs p-2 border rounded-xl">
-                                    <input type="text" id="eotp-${b.booking_id}" maxlength="4" placeholder="End OTP डालें" class="text-center font-bold text-xs p-2 border rounded-xl">
+                                    <input type="text" id="eotp-${b.booking_id}" maxlength="4" placeholder="End OTP" class="text-center font-bold text-xs p-2 border rounded-xl">
                                 </div>
                                 <button onclick="verifyEndOTP('${b.booking_id}')" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-extrabold">
-                                    🏁 End Trip & Add to Wallet
+                                    🏁 End Trip & Add Earning
                                 </button>
                             </div>
                         `}
@@ -336,7 +324,7 @@
                 <div class="bg-white p-3.5 rounded-2xl shadow-sm border flex justify-between items-center">
                     <div>
                         <p class="text-xs font-bold text-slate-900">#${b.booking_id} • ${b.pickup_loc} ➔ ${b.drop_loc}</p>
-                        <p class="text-[11px] text-slate-500">📅 ${b.journey_date} | कुल ग्राहक बिल: ₹${b.total_bill}</p>
+                        <p class="text-[11px] text-slate-500">📅 ${b.journey_date} | कुल बिल: ₹${b.total_bill}</p>
                     </div>
                     <span class="text-sm font-extrabold text-emerald-600">+ ₹${b.driver_earning}</span>
                 </div>
@@ -369,13 +357,13 @@
                     driver_verified: currentCaptain.police_verified
                 })
             });
-            alert('ड्यूटी स्वीकार हो गई! अब पिकअप पर पहुँचकर ग्राहक से Start OTP लें।');
+            alert('ड्यूटी स्वीकार हो गई!');
             await refreshDashboard();
         }
 
         async function verifyStartOTP(booking_id) {
             const otp = document.getElementById('sotp-' + booking_id).value.trim();
-            if (!otp) return alert('कृपया ग्राहक से पूछकर 4-डिजिट Start OTP डालें!');
+            if (!otp) return alert('Start OTP डालें!');
             const res = await fetch('/api/trip-action', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -383,14 +371,14 @@
             });
             const data = await res.json();
             if (data.error) return alert(data.error);
-            alert('Start OTP सही है! आपकी ट्रिप और लाइव मीटर चालू हो गया है।');
+            alert('ट्रिप शुरू हो गई!');
             await refreshDashboard();
         }
 
         async function verifyEndOTP(booking_id) {
             const otp = document.getElementById('eotp-' + booking_id).value.trim();
             const extra_minutes = document.getElementById('extramin-' + booking_id).value || 0;
-            if (!otp) return alert('कृपया ग्राहक से पूछकर 4-डिजिट End OTP डालें!');
+            if (!otp) return alert('End OTP डालें!');
             const res = await fetch('/api/trip-action', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -398,14 +386,14 @@
             });
             const data = await res.json();
             if (data.error) return alert(data.error);
-            alert('बधाई हो! ट्रिप पूरी हो गई है और आपकी कमाई तुरंत वॉलेट में जोड़ दी गई है।');
+            alert('ट्रिप पूरी हुई और पैसे वॉलेट में जुड़ गए!');
             await refreshDashboard();
         }
 
         function requestPayout() {
             const bal = currentCaptain?.wallet_balance || 0;
-            if (bal <= 0) return alert('अभी आपके वॉलेट में निकालने के लिए बैलेंस नहीं है।');
-            alert(`आपकी ₹${bal} की पेआउट रिक्वेस्ट एडमिन को भेज दी गई है! 24 घंटे में आपके बैंक/UPI खाते में राशि जमा हो जाएगी।`);
+            if (bal <= 0) return alert('वॉलेट में अभी बैलेंस नहीं है।');
+            alert(`₹${bal} की पेआउट रिक्वेस्ट एडमिन को भेज दी गई है!`);
         }
 
         function switchCapTab(tab) {
